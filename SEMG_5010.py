@@ -12,7 +12,7 @@ data['#timestamp'] = pd.to_datetime(data['#timestamp'], infer_datetime_format=Tr
 data['#timestamp'] = pd.Series(list(range(len(data))))
 
 # Respective Data of Electrodes Value and Electrodes axis Position.
-time_data = data.drop(data.iloc[:, 1:], axis=1)
+time_data = data['t']
 electrode_data = data.drop(data.iloc[:, :1155], axis=1)
 position_data = data.drop(data.iloc[:, 1155:1539], axis=1)
 position_data = position_data.drop(position_data.iloc[:, 0:3], axis=1)
@@ -39,6 +39,10 @@ for line in lines:
     lines = line[:-1].split(';')
     lines = [float(i) for i in lines]
     log.append(lines)
-log = np.array(log)
+labels = pd.DataFrame(log)
+labels = labels.drop_duplicates(0).drop(labels.columns[1], axis=1).dropna(axis=1)
+print(labels)
+
+
 
 # Preparing Labels for training and testing
