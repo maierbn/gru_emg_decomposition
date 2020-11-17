@@ -16,6 +16,8 @@ time_data = data['t']
 electrode_data = data.drop(data.iloc[:, :1155], axis=1)
 position_data = data.drop(data.iloc[:, 1155:1539], axis=1)
 position_data = position_data.drop(position_data.iloc[:, 0:3], axis=1)
+print(time_data)
+print(electrode_data)
 
 
 # Function for Normalizing the Data.
@@ -40,9 +42,18 @@ for line in lines:
     lines = [float(i) for i in lines]
     log.append(lines)
 labels = pd.DataFrame(log)
-labels = labels.drop_duplicates(0).drop(labels.columns[1], axis=1).dropna(axis=1)
-print(labels)
+labels = labels.drop_duplicates(0).drop(labels.columns[1], axis=1).replace(np.nan, 0)
+labels = labels.sort_values(by=0)
+print(labels.duplicated().any())
 
+
+# Function to Round labels to nearest 0.5 as in input.
+def round_labels(number):
+    return round(number * 2) / 2
+
+
+rounded_labels = round_labels(labels)
+print(rounded_labels)
 
 
 # Preparing Labels for training and testing
