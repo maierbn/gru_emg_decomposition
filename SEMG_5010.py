@@ -41,10 +41,10 @@ for line in lines:
     lines = line[:-1].split(';')
     lines = [float(i) for i in lines]
     log.append(lines)
-labels = pd.DataFrame(log)
-labels = labels.drop_duplicates(0).drop(labels.columns[1], axis=1).replace(np.nan, 0)
-labels = labels.sort_values(by=0)
-print(labels.duplicated().any())
+lab = pd.DataFrame(log)
+lab = lab.drop_duplicates(0).drop(lab.columns[1], axis=1).replace(np.nan, 0)
+lab = lab.sort_values(by=0)
+print(lab.duplicated().any())
 
 
 # Function to Round labels to nearest 0.5 as in input.
@@ -52,8 +52,26 @@ def round_labels(number):
     return round(number * 2) / 2
 
 
-rounded_labels = round_labels(labels)
-print(rounded_labels)
+rounded_labels = round_labels(lab)
 
+# This part converts log file to labels.
+lab1 = rounded_labels.iloc[:, 1:]
+f = []
+for i in range(len(lab1)):
+    for j in range(len(lab1.iloc[i, :])):
+        if (lab1.iloc[i, j] != 0).all():
+            f.append(i + 1)
+        else:
+            f.append(0)
+f[0] = 1
+print(f)
 
-# Preparing Labels for training and testing
+labels = np.zeros(20000)
+for i in range(len(lab)):
+    for j in range(len(lab.iloc[i, :])):
+        if lab.iloc[i, j] != 0:
+            labels[int((lab.iloc[i, j]) * 2)] = i + 1
+
+print(labels)
+
+# Timeseries generator
