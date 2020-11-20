@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import scipy.io
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.model_selection import train_test_split
 
 # Read CSV using Pandas Framework and covert data to pandas DataFrame
 data = pd.read_csv(r"C:\Users\SRIJAY\Desktop\Research Project\Data SET\50mus-10s\50mus-10s\electrodes.csv",
@@ -74,4 +75,9 @@ for i in range(len(lab)):
 
 print(labels)
 
-# Timeseries generator
+# Train Test Split
+
+X_train, X_test, y_train, y_test = train_test_split(Norm_electrode_data, labels, test_size=0.33)
+print(X_train.shape)
+print(y_train.shape)
+
