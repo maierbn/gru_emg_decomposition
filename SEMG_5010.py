@@ -9,6 +9,7 @@ import tensorflow as tf
 from tensorflow import keras
 from keras.utils import to_categorical
 from tensorflow.keras.preprocessing.sequence import TimeseriesGenerator
+from scipy.stats import zscore
 # Read CSV using Pandas Framework and covert data to pandas DataFrame
 from tensorflow.python.keras.optimizer_v2.adam import Adam
 
@@ -28,15 +29,23 @@ position_data = position_data.drop(position_data.iloc[:, 0:3], axis=1)
 # print(time_data)
 # print(electrode_data)
 
-
-# Function for Normalizing the Data.
-def normalize(dataset):
-    scaler = MinMaxScaler(feature_range=(0, 1))
-    data_normalized = scaler.fit_transform(dataset)
-    return data_normalized
+# Function for z-Score Standardisation.
+def Standardize(dataset):
+    data_standard = dataset.apply(zscore)
+    return data_standard
 
 
-Norm_electrode_data = normalize(electrode_data)
+Standardize_data = Standardize(electrode_data)
+print(Standardize_data)
+
+# # Function for Normalizing the Data.
+# def normalize(dataset):
+#     scaler = MinMaxScaler(feature_range=(0, 1))
+#     data_normalized = scaler.fit_transform(dataset)
+#     return data_normalized
+#
+#
+# Norm_electrode_data = normalize(electrode_data)
 
 # Import .mat file.
 mat = scipy.io.loadmat(r'C:\Users\SRIJAY\Desktop\Research Project\Data SET\50mus-10s\50mus-10s\emg_results.mat')
@@ -65,7 +74,6 @@ rounded_labels = round_labels(lab)
 
 # This part converts log file to labels.
 lab1 = rounded_labels.iloc[:, 1:]  # labels are rounded
-
 labels = np.zeros(20000)
 for i in range(len(lab1)):
     for j in range(len(lab1.iloc[i, :])):
@@ -75,14 +83,16 @@ for i in range(len(lab1)):
             labels[int((lab1.iloc[i, j]) * 2)] = 0
 labels[0] = 1
 
+
 # Train Test Split
 
-X_train, X_test, y_train, y_test = train_test_split(Norm_electrode_data, labels, test_size=0.33)
+X_train, X_test, y_train, y_test = train_test_split(Standardize_data, labels, test_size=0.33)
+# Look at Standardized or Normalized Data
 print('X_train:', X_train.shape, 'y_train:', y_train.shape)
 print('X_test:', X_test.shape, 'y_test:', y_test.shape)
 
-#plt.hist(labels, bins=51)
-#plt.show()
+# plt.hist(labels, bins=51)
+# plt.show()
 
 #  One hot coding using Keras Categorical
 
@@ -104,10 +114,12 @@ learning_rate = 0.001
 # Creating GRU model using tensorflow Keras
 
 model = keras.Sequential([
-    keras.layers.Bidirectional(keras.layers.GRU(units=80, return_sequences=True, activation='tanh'), input_shape=(80, 384)),
+    keras.layers.Bidirectional(keras.layers.GRU(units=80, return_sequences=True, activation='tanh'),
+                               input_shape=(80, 384)),
     keras.layers.Dropout(0.5),
     keras.layers.Bidirectional(keras.layers.GRU(units=80, activation='tanh')),
     keras.layers.Dropout(0.5),
+    keras.layers.Dense(100, activation='relu'),
     keras.layers.Dense(units=51, activation='softmax')
 ])
 
@@ -115,14 +127,13 @@ model.summary()
 # callback = keras.callbacks.EarlyStopping(monitor='loss', patience=3)
 opt = keras.optimizers.Adam(learning_rate=learning_rate, beta_1=0.9, beta_2=0.999, epsilon=1e-08)
 model.compile(optimizer=opt, loss='mean_squared_error', metrics=['accuracy'])
-history = model.fit(train_data_gen, validation_data=test_data_gen, steps_per_epoch=26, epochs=1)  # add callback for early stopping
-
+history = model.fit(train_data_gen, validation_data=test_data_gen, steps_per_epoch=26,
+                    epochs=1)  # add callback for early stopping
 
 # evaluate the model
 _, train_acc = model.evaluate(train_data_gen, verbose=0)
 _, test_acc = model.evaluate(test_data_gen, verbose=0)
 print('Train: %.3f, Test: %.3f' % (train_acc, test_acc))
-
 
 # # plot loss during training
 # plt.subplot(211)
