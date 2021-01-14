@@ -90,7 +90,10 @@ print(np.count_nonzero(y_train == 0))
 print(np.count_nonzero(y_test == 0))
 X_train = X_train.to_numpy()
 X_test = X_test.to_numpy()
-
+y_train = np.insert(y_train, 0, 0, axis=0)
+y_test = np.insert(y_test, 0, 0, axis=0)
+y_train = y_train[0:75000]
+y_test = y_test[0:25000]
 #  One hot coding using Keras Categorical
 y_train = to_categorical(y_train)
 y_test = to_categorical(y_test)
@@ -102,7 +105,7 @@ print('X_test:', X_test.shape, 'y_test:', y_test.shape, type(X_test), type(y_tes
 # Used Timeseriesgenerator API to do the above reshaping
 
 look_back = 400
-batch_size = 512
+batch_size = 1
 train_data_gen = TimeseriesGenerator(X_train, y_train, length=look_back, batch_size=batch_size, shuffle=False)
 test_data_gen = TimeseriesGenerator(X_test, y_test, length=look_back, batch_size=batch_size, shuffle=False)
 
@@ -154,7 +157,7 @@ d_class_weights = dict(enumerate(class_weights))
 # d_class_weights =  {0: 0.8, 1: 4.8, 2: 4.8, 3: 4.8, 4: 4.8, 5: 4.8, 6: 4.8, 7: 4.8, 8: 4.8,
 #   9: 4.8, 10: 4.8, 11: 4.8, 12: 4.8, 13: 4.8, 14: 4.5, 15: 4.5, 16: 4.5, 17: 4.8, 18: 4.8, 19: 4.8, 20: 4.8}
 
-history = model.fit(train_data_gen, validation_data=test_data_gen, epochs=epochs, shuffle=False,
+history = model.fit(train_data_gen, validation_data=test_data_gen, epochs=epochs, shuffle=False, batch_size=batch_size,
                     class_weight=d_class_weights, callbacks=[tensorboard_callback, earlystop_callback], verbose=0)
 
 print("Test Predictions")
