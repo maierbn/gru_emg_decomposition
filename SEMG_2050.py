@@ -154,7 +154,7 @@ METRICS = [
     keras.metrics.Precision(name='precision'),
     keras.metrics.Recall(name='recall'),
     keras.metrics.AUC(name='auc'),
-    keras.metrics.MeanIoU(name='IoU')
+    keras.metrics.MeanIoU(name='IoU', num_classes=21)
 ]
 
 # Early stopping callback when false negative are min.
