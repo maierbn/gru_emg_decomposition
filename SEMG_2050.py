@@ -88,10 +88,10 @@ def generate_labels(output_data):
                 labels[int((lab1[i, j]) * 2)] = 0
     labels[0] = 1
     print(labels.shape)
-    return labels
+    return lab1, labels
 
 
-labels = generate_labels(out_data)
+ground, labels = generate_labels(out_data)
 print(labels[0:10])
 
 
@@ -199,14 +199,14 @@ def validation(Y_test):
     y_tst = y_tst[:(len(y_tst) - length)]
     cm = confusion_matrix(y_tst, y_prediction)
     print('Classification Report')
-    target_names = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17',
-                    '18',
-                    '19', '20']
+    Motor_unit = len(np.unique(labels))
+    target_names = [str(x) for x in range(Motor_unit)]
     cr = classification_report(y_tst, y_prediction, target_names=target_names)
-    return cm, cr, target_names
+    print(cr)
+    return cm, cr, target_names, y_prediction
 
 
-conf_matrix, class_report, target = validation(y_test)
+conf_matrix, class_report, target, y_pred = validation(y_test)
 
 
 # This function plots confusion matrix.
@@ -236,3 +236,27 @@ def plot_confusion_matrix(cm, classes,
 
 
 plot_confusion_matrix(conf_matrix, target, title='confusion_matrix, With Class Weight')
+
+
+def Rastor_plot(predictions, ground_t):
+    pred_num = np.array(predictions)
+    vec = []
+    for i in range(len(np.unique(pred_num))):
+        if np.where(pred_num == i):
+            IPT = np.where(pred_num == i)
+            vec.append(IPT)
+    vec_new = pd.DataFrame(vec)
+    vec_num = vec_new.iloc[1:, 0]
+    vec_plt = np.array(vec_num)
+    plt.rcParams["figure.figsize"] = (20, 7)
+    plt.xlabel('Time/sec')
+    plt.ylabel('Motor units')
+    plt.title('Ground Truth TEST LABEL')
+    plt.eventplot(ground_t[:, 914:], color='red', linestyles=':', lineoffsets=0.5, linelengths=0.5, linewidths=0.5)
+    plt.eventplot(vec_plt, color='green', linestyles='solid', lineoffsets=0.5, linelengths=0.5, linewidths=0.5)
+    plt.axis([0, 5000, 0, 8])
+    plt.legend()
+    plt.show()
+
+
+Rastor_plot(y_pred, ground)
