@@ -38,6 +38,7 @@ def listDir(dir):
 
 inp_data, out_data = listDir(path)
 
+inp_data = ""
 
 # Read CSV using Pandas Framework and covert data to pandas DataFrame
 # Data Cleaning
@@ -107,8 +108,8 @@ def train_test_data(input_data, output_data, look_back, bs):
     y_tra = y_tra[0:75000]
     y_tes = y_tes[0:25000]
     #  One hot coding using Keras Categorical
-    y_tra = to_categorical(y_tra)
-    y_tes = to_categorical(y_tes)
+    y_tra = y_tra[0:len(y_tra) - 1]
+    y_tes = y_tes[0:len(y_tes) - 1]
     print('X_train:', X_tra.shape, 'y_train:', y_tra.shape, type(X_tra), type(y_tra))
     print('X_test:', X_tes.shape, 'y_test:', y_tes.shape, type(X_tes), type(y_tes))
     # Reshape input to be 3D [samples, time steps, features] as expected by GRU
