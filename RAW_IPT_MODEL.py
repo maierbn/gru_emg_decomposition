@@ -1,6 +1,7 @@
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
+
 matplotlib.use('Agg')
 import numpy as np
 import pandas as pd
@@ -15,6 +16,7 @@ import datetime
 from sklearn.utils.class_weight import compute_class_weight
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import train_test_split
+from sklearn.cluster import KMeans
 from sklearn.metrics import classification_report
 import itertools
 import sys
@@ -95,6 +97,7 @@ def generate_labels(output_data):
 
 ground, labels = generate_labels(out_data)
 print(labels[0:10])
+
 
 def IPT_LABELS(mat_file):
     mat_df = pd.DataFrame(mat_file['IPTs'])
@@ -177,14 +180,15 @@ history = model.fit(train_data_gen, validation_data=test_data_gen, epochs=epochs
 
 
 def raster_plot(label):
-    predictions = model.predict(test_data_gen)
-    np.savetxt('prediction.csv', predictions, delimiter=',')
+    y_predictions = model.predict(test_data_gen)
+    np.savetxt('prediction.csv', y_predictions, delimiter=',')
     model.save('2040_IPT_MODEL.h5')
-
+    # Kmeans clustering for converting to timestamp
+    predictions = KMeans(n_clusters=15, random_state=0).fit(y_predictions)
     IPT = []
     for i in range(len(predictions)):
-        if np.where(predictions[i] > 0.25):
-            IPT.append(np.where(predictions[i] > 0.25))
+        if np.where(predictions == i):
+            IPT.append(np.where(predictions == i))
     threshold_IPT = np.array(IPT)
     IPT_pred = pd.DataFrame(threshold_IPT)
     np.savetxt('threshold_IPT.csv', threshold_IPT, delimiter=',')
