@@ -211,7 +211,7 @@ def raster_plot(label):
     plt.eventplot(IPT_ground, color='black', linestyles=':', lineoffsets=1, linelengths=0.5, linewidths=0.5)
     colors = ['red', 'black']
     lines = [Line2D([0], [0], color=c, linewidth=4, linestyle=':') for c in colors]
-    labels_all = ['IPT_predicted', 'IPT Ground truth']
+    labels_all = ['GRU predicted IPT', 'IPT Ground truth']
     plt.legend(lines, labels_all)
     plt.show();
 
